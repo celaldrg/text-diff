@@ -1,0 +1,11 @@
+{
+  "name": "text-diff",
+  "version": "1.0.0",
+  "description": "Compare two texts line by line, word by word or character by character, and create or apply unified patches.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  },
+  "license": "MIT"
+}

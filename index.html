@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Text Diff</title>
+  <meta name="description" content="Compare two texts by line, word or character, see the changes side by side or inline, and create or apply unified patches. Runs entirely in your browser.">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="color-scheme" content="dark">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Text Diff">
+  <meta property="og:description" content="Compare two texts by line, word or character, see the changes side by side or inline, and create or apply unified patches.">
+  <meta property="og:url" content="https://celaldrg.github.io/text-diff/">
+  <meta property="og:image" content="https://celaldrg.github.io/text-diff/docs/screenshot.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23fb923c'/%3E%3Cpath d='M16 7v18' stroke='%23431407' stroke-opacity='.4' stroke-width='1.6'/%3E%3Cpath d='M6.5 16h6.5M19 16h6.5M22.25 12.75v6.5' stroke='%23431407' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="src/main.js"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 32 32" width="34" height="34" aria-hidden="true">
+          <rect width="32" height="32" rx="8" fill="#fb923c"/>
+          <path d="M16 7v18" stroke="#431407" stroke-opacity=".4" stroke-width="1.6"/>
+          <path d="M6.5 16h6.5M19 16h6.5M22.25 12.75v6.5" stroke="#431407" stroke-width="2.6" stroke-linecap="round"/>
+        </svg>
+        <h1 data-i18n="appTitle">Text Diff</h1>
+        <p class="tagline" data-i18n="tagline">Compare two texts by line, word or character</p>
+      </div>
+      <div class="top-actions">
+        <button type="button" class="btn" id="clear" title="Clear both texts" data-i18n-title="clearTitle">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l.9 12.2a1.8 1.8 0 0 0 1.8 1.8h5.6a1.8 1.8 0 0 0 1.8-1.8L17.5 7M10 11v6M14 11v6"/></svg>
+          <span data-i18n="clear">Clear</span>
+        </button>
+        <button type="button" class="btn lang" id="lang" title="TR: switch to Turkish" aria-label="TR: switch to Turkish" data-i18n-title="langSwitch" data-i18n-aria-label="langSwitch">TR</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="card inputs">
+        <div class="panes">
+          <div class="pane" id="pane-left">
+            <div class="pane-head">
+              <label class="pane-title" for="left" data-i18n="original">Original</label>
+              <span class="pane-meta" id="left-meta"></span>
+              <button type="button" class="btn small" id="open-left" title="Open a file as the original text" data-i18n-title="openLeftTitle">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5a2 2 0 0 1 2-2h3.6l2 2h7.4a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2z"/></svg>
+                <span data-i18n="openFile">Open file</span>
+              </button>
+              <input type="file" id="file-left" hidden>
+            </div>
+            <textarea id="left" class="text" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="Type or paste the original text, or drop a file here" data-i18n-placeholder="leftPlaceholder"></textarea>
+            <div class="drop-hint" aria-hidden="true"><span data-i18n="dropHere">Drop the file to open it</span></div>
+          </div>
+
+          <div class="swap-col">
+            <button type="button" class="btn swap" id="swap" title="Swap the two texts" data-i18n-title="swapTitle">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h15M15 4l4 4-4 4M20 16H5M9 12l-4 4 4 4"/></svg>
+              <span class="swap-label" data-i18n="swap">Swap</span>
+            </button>
+          </div>
+
+          <div class="pane" id="pane-right">
+            <div class="pane-head">
+              <label class="pane-title" for="right" data-i18n="changed">Changed</label>
+              <span class="pane-meta" id="right-meta"></span>
+              <button type="button" class="btn small" id="open-right" title="Open a file as the changed text" data-i18n-title="openRightTitle">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5a2 2 0 0 1 2-2h3.6l2 2h7.4a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2z"/></svg>
+                <span data-i18n="openFile">Open file</span>
+              </button>
+              <input type="file" id="file-right" hidden>
+            </div>
+            <textarea id="right" class="text" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="Type or paste the changed text, or drop a file here" data-i18n-placeholder="rightPlaceholder"></textarea>
+            <div class="drop-hint" aria-hidden="true"><span data-i18n="dropHere">Drop the file to open it</span></div>
+          </div>
+        </div>
+
+        <div class="options" role="group" aria-label="Comparison options" data-i18n-aria-label="optionsLabel">
+          <label class="field">
+            <span data-i18n="compareBy">Compare by</span>
+            <select id="mode" class="select">
+              <option value="lines" data-i18n="modeLines">Lines</option>
+              <option value="words" data-i18n="modeWords">Words</option>
+              <option value="chars" data-i18n="modeChars">Characters</option>
+            </select>
+          </label>
+          <label class="toggle"><input type="checkbox" id="ignore-whitespace"><span data-i18n="ignoreWhitespace">Ignore whitespace</span></label>
+          <label class="toggle"><input type="checkbox" id="ignore-case"><span data-i18n="ignoreCase">Ignore case</span></label>
+          <label class="toggle"><input type="checkbox" id="ignore-blank"><span data-i18n="ignoreBlankLines">Ignore blank lines</span></label>
+          <label class="field" title="Unchanged lines shown around each change in the patch" data-i18n-title="contextTitle">
+            <span data-i18n="contextLines">Context lines</span>
+            <input type="number" id="context" class="number" min="0" step="1" inputmode="numeric" value="3">
+          </label>
+        </div>
+      </section>
+
+      <section class="card result">
+        <div class="result-bar">
+          <div class="tabs" role="tablist" aria-label="Result views" data-i18n-aria-label="viewsLabel">
+            <button type="button" class="tab" role="tab" id="tab-split" data-view="split" aria-controls="panel-split" aria-selected="true"><span data-i18n="tabSplit">Side by side</span></button>
+            <button type="button" class="tab" role="tab" id="tab-inline" data-view="inline" aria-controls="panel-inline" aria-selected="false" tabindex="-1"><span data-i18n="tabInline">Inline</span></button>
+            <button type="button" class="tab" role="tab" id="tab-patch" data-view="patch" aria-controls="panel-patch" aria-selected="false" tabindex="-1"><span data-i18n="tabPatch">Patch</span></button>
+            <button type="button" class="tab" role="tab" id="tab-apply" data-view="apply" aria-controls="panel-apply" aria-selected="false" tabindex="-1"><span data-i18n="tabApply">Apply patch</span></button>
+          </div>
+          <div class="stats">
+            <span class="stat add" title="Lines that are only in the changed text" data-i18n-title="statAddedTitle"><span class="stat-label" data-i18n="statAdded">Added</span> <b class="stat-value" id="stat-added">+0</b></span>
+            <span class="stat del" title="Lines that are only in the original text" data-i18n-title="statRemovedTitle"><span class="stat-label" data-i18n="statRemoved">Removed</span> <b class="stat-value" id="stat-removed">−0</b></span>
+            <span class="stat chg" title="Lines that were edited" data-i18n-title="statChangedTitle"><span class="stat-label" data-i18n="statChanged">Changed</span> <b class="stat-value" id="stat-changed">~0</b></span>
+            <span class="stat sim" title="Share of the characters that did not change, the unchanged parts of changed lines included" data-i18n-title="statSimilarityTitle"><span class="stat-label" data-i18n="statSimilarity">Similarity</span> <span class="meter" aria-hidden="true"><span class="meter-fill" id="sim-bar"></span></span> <b class="stat-value" id="stat-similarity">—</b></span>
+          </div>
+          <div class="nav">
+            <button type="button" class="btn icon-only" id="prev" title="Previous change (P)" aria-label="Previous change (P)" data-i18n-title="prevTitle" data-i18n-aria-label="prevTitle">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
+            </button>
+            <span class="counter" id="counter" aria-live="polite"></span>
+            <button type="button" class="btn icon-only" id="next" title="Next change (N)" aria-label="Next change (N)" data-i18n-title="nextTitle" data-i18n-aria-label="nextTitle">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <p class="notice" id="notice" hidden></p>
+
+        <div class="empty" id="empty" hidden>
+          <svg class="empty-art" viewBox="0 0 120 80" width="120" height="80" aria-hidden="true">
+            <rect x="5" y="7" width="50" height="66" rx="9" fill="#0f172a" stroke="#334155" stroke-width="2"/>
+            <rect x="65" y="7" width="50" height="66" rx="9" fill="#0f172a" stroke="#334155" stroke-width="2"/>
+            <path d="M15 22h30M15 42h26M15 52h18M75 22h30M75 42h26M75 52h18" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+            <path d="M15 32h22" stroke="#f87171" stroke-width="4" stroke-linecap="round"/>
+            <path d="M75 32h28" stroke="#4ade80" stroke-width="4" stroke-linecap="round"/>
+          </svg>
+          <h2 data-i18n="emptyTitle">Nothing to compare yet</h2>
+          <p data-i18n="emptyBody">Type, paste, open or drop a text on each side to see what changed.</p>
+          <button type="button" class="btn primary" id="try-example" data-i18n="tryExample">Try an example</button>
+        </div>
+
+        <div class="panel diff split" id="panel-split" role="tabpanel" aria-labelledby="tab-split"></div>
+        <div class="panel diff inline" id="panel-inline" role="tabpanel" aria-labelledby="tab-inline" hidden></div>
+
+        <div class="panel" id="panel-patch" role="tabpanel" aria-labelledby="tab-patch" hidden>
+          <div class="panel-head">
+            <div class="panel-heading">
+              <h2 class="panel-title" data-i18n="patchTitle">Unified diff</h2>
+              <span class="muted" id="hunk-count"></span>
+            </div>
+            <div class="panel-actions">
+              <button type="button" class="btn small" id="copy-patch">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"/></svg>
+                <span data-i18n="copy">Copy</span>
+              </button>
+              <button type="button" class="btn small" id="download-patch">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg>
+                <span data-i18n="download">Download .diff</span>
+              </button>
+            </div>
+          </div>
+          <pre class="patch" id="patch-output"></pre>
+          <p class="panel-empty" id="patch-empty" data-i18n="noPatch" hidden>No patch: the texts do not differ.</p>
+        </div>
+
+        <div class="panel" id="panel-apply" role="tabpanel" aria-labelledby="tab-apply" hidden>
+          <div class="panel-head">
+            <label class="panel-title" for="patch-input" data-i18n="patchLabel">Patch to apply to the original text</label>
+            <div class="panel-actions">
+              <button type="button" class="btn small" id="open-patch" title="Open a .diff or .patch file" data-i18n-title="openPatchTitle">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5a2 2 0 0 1 2-2h3.6l2 2h7.4a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2z"/></svg>
+                <span data-i18n="openPatch">Open patch</span>
+              </button>
+              <input type="file" id="file-patch" hidden>
+              <button type="button" class="btn small primary" id="apply">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+                <span data-i18n="apply">Apply to original</span>
+              </button>
+            </div>
+          </div>
+          <div class="apply-body">
+            <div class="pane patch-zone" id="patch-zone">
+              <textarea id="patch-input" class="text patch-input" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="Paste a unified diff (diff -u) here, or drop a .diff file" data-i18n-placeholder="patchPlaceholder"></textarea>
+              <div class="drop-hint" aria-hidden="true"><span data-i18n="dropHere">Drop the file to open it</span></div>
+            </div>
+            <p class="hint" data-i18n="applyKeyHint">Ctrl+Enter applies the patch.</p>
+            <div class="apply-outcome" id="apply-outcome" hidden>
+              <p class="status" id="apply-status" role="status"></p>
+              <h3 class="outcome-title" id="apply-title"></h3>
+              <pre class="outcome-text" id="apply-output"></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span class="keys" data-i18n="keysHint">Keys: N next change · P previous change</span>
+      <span>MIT · <a href="https://github.com/celaldrg/text-diff" data-i18n="footerSource">Source on GitHub</a></span>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <span id="toast-text"></span>
+    <button type="button" class="btn small" id="toast-action" hidden></button>
+  </div>
+</body>
+</html>
