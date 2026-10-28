@@ -127,6 +127,27 @@ Herhangi bir statik dosya sunucusu yeterli, örneğin `npx serve .` komutu. ES m
 ### Proje yapısı
 
 ```
+index.html          page markup
+style.css           dark theme, mobile first
+src/
+  myers.js          Myers O(ND) diff in linear space
+  tokens.js         lines, words, characters and ignore keys
+  diff.js           text diff with the ignore options
+  cleanup.js        semantic cleanup of tiny matches
+  align.js          pairs changed lines for side by side
+  compare.js        rows, inline rows, changes and stats
+  unified.js        unified diff writer, parser and patcher
+  session.js        texts, options and the selected change
+  demo.js           the ?demo example
+  format.js         pure display helpers
+  i18n.js           English and Turkish strings
+  storage.js        localStorage wrapper
+  files.js          open and drop files (UI)
+  render.js         builds the result views (UI)
+  main.js           wires the page together (UI)
+test/               node --test suites
+docs/screenshot.png
+```
 
 ### Lisans
 
